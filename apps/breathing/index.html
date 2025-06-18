@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Breathing Exercise</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 h-screen overflow-hidden">
+  <div class="h-full flex flex-col items-center justify-center p-8 relative">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+      <div class="absolute top-3/4 right-1/4 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-16 h-16 bg-cyan-200 rounded-full opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="text-center max-w-md w-full relative z-10">
+      <!-- Header -->
+      <h1 class="text-3xl font-light text-gray-800 mb-2">Breathing Exercise</h1>
+      <p class="text-gray-600 mb-8">Take a moment to breathe and relax</p>
+
+      <!-- Breathing Circle -->
+      <div class="relative mb-8">
+        <div id="breathingCircle" class="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-blue-300 to-indigo-400 shadow-2xl transition-all duration-4000 ease-in-out flex items-center justify-center">
+          <div class="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+            <span id="breathingText" class="text-white text-xl font-medium">Breathe</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="space-y-4">
+        <button id="startBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+          Start Breathing Exercise
+        </button>
+        <button id="stopBtn" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-6 rounded-lg transition-colors opacity-50 cursor-not-allowed" disabled>
+          Stop Exercise
+        </button>
+      </div>
+
+      <!-- Instructions -->
+      <div class="mt-6 text-sm text-gray-600">
+        <p>4 seconds inhale • 4 seconds hold • 4 seconds exhale</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let breathingInterval;
+    let isBreathing = false;
+    
+    const circle = document.getElementById('breathingCircle');
+    const text = document.getElementById('breathingText');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    
+    function startBreathing() {
+      if (isBreathing) return;
+      
+      isBreathing = true;
+      startBtn.disabled = true;
+      startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      stopBtn.disabled = false;
+      stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      let phase = 0; // 0: inhale, 1: hold, 2: exhale, 3: hold
+      
+      function breathingCycle() {
+        switch(phase) {
+          case 0: // Inhale
+            text.textContent = 'Inhale';
+            circle.style.transform = 'scale(1.3)';
+            circle.style.backgroundColor = '#60a5fa';
+            break;
+          case 1: // Hold after inhale
+            text.textContent = 'Hold';
+            break;
+          case 2: // Exhale
+            text.textContent = 'Exhale';
+            circle.style.transform = 'scale(1)';
+            circle.style.backgroundColor = '#818cf8';
+            break;
+          case 3: // Hold after exhale
+            text.textContent = 'Hold';
+            break;
+        }
+        
+        phase = (phase + 1) % 4;
+      }
+      
+      breathingCycle(); // Start immediately
+      breathingInterval = setInterval(breathingCycle, 4000);
+    }
+    
+    function stopBreathing() {
+      if (!isBreathing) return;
+      
+      isBreathing = false;
+      clearInterval(breathingInterval);
+      
+      // Reset UI
+      text.textContent = 'Breathe';
+      circle.style.transform = 'scale(1)';
+      circle.style.backgroundColor = '';
+      
+      startBtn.disabled = false;
+      startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      stopBtn.disabled = true;
+      stopBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    startBtn.addEventListener('click', startBreathing);
+    stopBtn.addEventListener('click', stopBreathing);
+  </script>
+</body>
+</html>

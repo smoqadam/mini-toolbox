@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen overflow-hidden">
+  <div class="h-full bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse" style="animation-delay: 2s;"></div>
+      <div class="absolute top-40 left-40 w-80 h-80 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="text-center max-w-6xl w-full relative z-10">
+      <!-- Clock and Date Section -->
+      <div class="mb-8">
+        <div id="current-time" class="text-6xl md:text-7xl font-thin tracking-wider mb-2 text-gray-800 drop-shadow-sm"></div>
+        <div id="current-date" class="text-xl md:text-2xl font-light text-gray-600 drop-shadow-sm"></div>
+      </div>
+      
+      <!-- Apps Grid -->
+      <div id="app-grid" class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto"></div>
+      
+      <!-- Open Source Attribution -->
+      <div class="mt-16 bg-white/40 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto border border-gray-200/50">
+        <div class="text-sm text-gray-500 text-center leading-relaxed">
+          <a href="https://github.com/smoqadam/mini-toolbox" target="_blank" class="text-blue-600 hover:text-blue-800 underline font-medium transition-colors mt-1 inline-block">
+            Contribute on GitHub ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab ID will be received via postMessage
+    let tabId = 'default-home';
+
+    // Listen for tab ID from parent
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'TAB_ID') {
+        tabId = event.data.tabId;
+      }
+      if (event.data.type === 'APPS_DATA') {
+        renderApps(event.data.apps);
+      }
+    });
+
+    function updateClock() {
+      const timeElement = document.getElementById('current-time');
+      const dateElement = document.getElementById('current-date');
+      
+      if (!timeElement || !dateElement) return;
+      
+      const now = new Date();
+      
+      // Update time
+      const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      timeElement.textContent = now.toLocaleTimeString('en-US', timeOptions);
+      
+      // Update date
+      const dateOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      };
+      dateElement.textContent = now.toLocaleDateString('en-US', dateOptions);
+    }
+
+    function renderApps(apps) {
+      const appGrid = document.getElementById('app-grid');
+      appGrid.innerHTML = '';
+      
+      apps.forEach((app, index) => {
+        const appCard = document.createElement('div');
+        appCard.className = 'group bg-white/70 backdrop-blur-md rounded-3xl p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-xl hover:bg-white/90 border border-gray-200/50 text-center transform hover:-translate-y-2 shadow-lg';
+        appCard.onclick = () => openApp(app.id, app.name);
+        appCard.style.animationDelay = `${index * 0.1}s`;
+        appCard.classList.add('animate-fadeInUp');
+        
+        appCard.innerHTML = `
+          <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300 filter drop-shadow-sm">${app.icon}</div>
+          <div class="text-2xl font-semibold text-gray-800 mb-3 group-hover:text-gray-900 transition-colors duration-300">${app.name}</div>
+          <div class="text-sm text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">${app.description}</div>
+        `;
+        
+        appGrid.appendChild(appCard);
+      });
+    }
+
+    function openApp(appId, appName) {
+      // Send message to parent to open app
+      window.parent.postMessage({
+        type: 'OPEN_APP',
+        appId: appId,
+        appName: appName
+      }, '*');
+    }
+
+    // Start clock updates
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Request apps data from parent
+    window.parent.postMessage({
+      type: 'REQUEST_APPS'
+    }, '*');
+
+    // Add fadeInUp animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .animate-fadeInUp {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

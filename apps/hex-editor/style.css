@@ -1,0 +1,151 @@
+.hex-row {
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hex-row:hover {
+  background-color: #f9fafb;
+}
+
+.hex-offset {
+  width: 100px;
+  color: #6b7280;
+  font-weight: 500;
+  padding-right: 16px;
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid #e5e7eb;
+  margin-right: 16px;
+}
+
+.hex-bytes {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-right: 16px;
+}
+
+.hex-byte {
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 24px;
+  text-align: center;
+  user-select: none;
+}
+
+.hex-byte:hover {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.hex-byte.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.hex-byte.editing {
+  background-color: #f59e0b;
+  color: white;
+  outline: 2px solid #d97706;
+}
+
+.hex-byte.modified {
+  background-color: #10b981;
+  color: white;
+}
+
+.hex-spacer {
+  width: 8px;
+}
+
+.ascii-display {
+  width: 180px;
+  color: #4b5563;
+  font-family: 'Courier New', monospace;
+  border-left: 1px solid #e5e7eb;
+  padding-left: 16px;
+  word-break: break-all;
+  user-select: none;
+}
+
+.ascii-char {
+  display: inline-block;
+  width: 10px;
+  text-align: center;
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 2px;
+}
+
+.ascii-char:hover {
+  background-color: #dbeafe;
+}
+
+.ascii-char.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.search-highlight {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+#hex-display {
+  padding: 16px;
+  background: white;
+  min-height: 100%;
+}
+
+.bytes-per-row-16 .hex-byte:nth-child(8)::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Loading animation */
+.loading {
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
