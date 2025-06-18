@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Drawing Canvas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="overflow-hidden bg-gray-50">
+  <div class="fixed top-4 left-4 z-10 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-4">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">Color:</label>
+        <input type="color" id="colorPicker" value="#000000" class="w-8 h-8 rounded-lg border-0 cursor-pointer">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">Size:</label>
+        <input type="range" id="sizePicker" min="1" max="20" value="2" class="w-20 accent-indigo-500">
+      </div>
+      <button id="clearBtn" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+        Clear
+      </button>
+    </div>
+  </div>
+  <canvas id="drawCanvas" class="block bg-white cursor-crosshair w-screen h-screen"></canvas>
+
+  <script>
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // Tab ID will be received via postMessage
+    let tabId = 'default-draw';
+    let storageKey = `drawing-${tabId}`;
+
+    // Listen for tab ID from parent
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'TAB_ID') {
+        tabId = event.data.tabId;
+        storageKey = `drawing-${tabId}`;
+        loadDrawing(); // Load drawing after receiving tab ID
+      }
+    });
+
+    // Set canvas size to full window
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      loadDrawing(); // Reload after resize
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Drawing state
+    let isDrawing = false;
+
+    // Save/Load functions
+    function saveDrawing() {
+      const imageData = canvas.toDataURL();
+      localStorage.setItem(storageKey, imageData);
+    }
+
+    function loadDrawing() {
+      const savedData = localStorage.getItem(storageKey);
+      if (savedData) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = savedData;
+      }
+    }
+
+    // Drawing functions
+    function startDrawing(e) {
+      isDrawing = true;
+      draw(e);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      
+      ctx.lineWidth = sizePicker.value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = colorPicker.value;
+      
+      ctx.lineTo(e.clientX, e.clientY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX, e.clientY);
+    }
+
+    function stopDrawing() {
+      if (isDrawing) {
+        isDrawing = false;
+        ctx.beginPath();
+        saveDrawing(); // Save after each stroke
+      }
+    }
+
+    // Event listeners
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    clearBtn.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      localStorage.removeItem(storageKey); // Remove saved data when cleared
+    });
+
+    // Load drawing on startup (will be reloaded when tab ID is received)
+    loadDrawing();
+  </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Todo List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 h-screen">
+  <div class="h-full flex flex-col p-6 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Todo List</h1>
+    
+    <div class="flex gap-2 mb-6">
+      <input 
+        type="text" 
+        id="todoInput" 
+        placeholder="Add a new task..."
+        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+      <button 
+        id="addBtn"
+        class="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
+      >
+        Add
+      </button>
+    </div>
+    
+    <div id="todoList" class="flex-1 space-y-2 overflow-y-auto"></div>
+  </div>
+
+  <script>
+    const todoInput = document.getElementById('todoInput');
+    const addBtn = document.getElementById('addBtn');
+    const todoList = document.getElementById('todoList');
+    
+    // Tab ID will be received via postMessage
+    let tabId = 'default-todos';
+    let storageKey = `todos-${tabId}`;
+    
+    let todos = [];
+    
+    // Listen for tab ID from parent
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'TAB_ID') {
+        tabId = event.data.tabId;
+        storageKey = `todos-${tabId}`;
+        loadTodos(); // Load todos after receiving tab ID
+      }
+    });
+    
+    function saveTodos() {
+      localStorage.setItem(storageKey, JSON.stringify(todos));
+    }
+    
+    function loadTodos() {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        todos = JSON.parse(saved);
+        renderTodos();
+      }
+    }
+    
+    function addTodo(text) {
+      if (!text.trim()) return;
+      
+      todos.push({
+        id: Date.now(),
+        text: text.trim(),
+        completed: false
+      });
+      
+      saveTodos();
+      renderTodos();
+    }
+    
+    function toggleTodo(id) {
+      todos = todos.map(todo => 
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      );
+      saveTodos();
+      renderTodos();
+    }
+    
+    function deleteTodo(id) {
+      todos = todos.filter(todo => todo.id !== id);
+      saveTodos();
+      renderTodos();
+    }
+    
+    function renderTodos() {
+      todoList.innerHTML = todos.map(todo => `
+        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+          <input 
+            type="checkbox" 
+            ${todo.completed ? 'checked' : ''} 
+            onchange="toggleTodo(${todo.id})"
+            class="w-4 h-4 text-indigo-600 rounded"
+          >
+          <span class="flex-1 ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}">${todo.text}</span>
+          <button 
+            onclick="deleteTodo(${todo.id})"
+            class="text-red-500 hover:text-red-700 text-sm px-2"
+          >
+            Delete
+          </button>
+        </div>
+      `).join('');
+    }
+    
+    addBtn.addEventListener('click', () => {
+      addTodo(todoInput.value);
+      todoInput.value = '';
+    });
+    
+    todoInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addTodo(todoInput.value);
+        todoInput.value = '';
+      }
+    });
+    
+    // Make functions global for onclick handlers
+    window.toggleTodo = toggleTodo;
+    window.deleteTodo = deleteTodo;
+    
+    // Load todos on startup (will be reloaded when tab ID is received)
+    loadTodos();
+  </script>
+</body>
+</html>
