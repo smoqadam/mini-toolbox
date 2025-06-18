@@ -5,9 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Home</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .app-icon {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .app-icon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .app-icon:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
 <body class="h-screen overflow-hidden">
-  <div class="h-full bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+  <div class="h-full bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 flex flex-col items-center p-4 relative">
     <!-- Animated background elements -->
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse"></div>
@@ -15,21 +29,23 @@
       <div class="absolute top-40 left-40 w-80 h-80 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-pulse" style="animation-delay: 4s;"></div>
     </div>
     
-    <div class="text-center max-w-6xl w-full relative z-10">
+    <div class="w-full relative z-10 flex flex-col h-full">
       <!-- Clock and Date Section -->
-      <div class="mb-8">
-        <div id="current-time" class="text-6xl md:text-7xl font-thin tracking-wider mb-2 text-gray-800 drop-shadow-sm"></div>
-        <div id="current-date" class="text-xl md:text-2xl font-light text-gray-600 drop-shadow-sm"></div>
+      <div class="text-center mb-6 mt-4">
+        <div id="current-time" class="text-4xl md:text-5xl font-thin tracking-wider mb-1 text-gray-800 drop-shadow-sm"></div>
+        <div id="current-date" class="text-md md:text-lg font-light text-gray-600 drop-shadow-sm"></div>
       </div>
       
-      <!-- Apps Grid -->
-      <div id="app-grid" class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto"></div>
+      <!-- Apps Grid - Android Style -->
+      <div class="flex-1 flex items-center justify-center">
+        <div id="app-grid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-4 md:gap-6"></div>
+      </div>
       
-      <!-- Open Source Attribution -->
-      <div class="mt-16 bg-white/40 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto border border-gray-200/50">
-        <div class="text-sm text-gray-500 text-center leading-relaxed">
-          <a href="https://github.com/smoqadam/mini-toolbox" target="_blank" class="text-blue-600 hover:text-blue-800 underline font-medium transition-colors mt-1 inline-block">
-            Contribute on GitHub ↗
+      <!-- Small footer -->
+      <div class="text-center mt-auto mb-4">
+        <div class="text-xs text-gray-500">
+          <a href="https://github.com/smoqadam/mini-toolbox" target="_blank" class="text-blue-600 hover:text-blue-800">
+            GitHub ↗
           </a>
         </div>
       </div>
@@ -62,16 +78,14 @@
       const timeOptions = {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: false
       };
       timeElement.textContent = now.toLocaleTimeString('en-US', timeOptions);
       
       // Update date
       const dateOptions = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
+        weekday: 'short',
+        month: 'short',
         day: 'numeric'
       };
       dateElement.textContent = now.toLocaleDateString('en-US', dateOptions);
@@ -82,19 +96,20 @@
       appGrid.innerHTML = '';
       
       apps.forEach((app, index) => {
-        const appCard = document.createElement('div');
-        appCard.className = 'group bg-white/70 backdrop-blur-md rounded-3xl p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-xl hover:bg-white/90 border border-gray-200/50 text-center transform hover:-translate-y-2 shadow-lg';
-        appCard.onclick = () => openApp(app.id, app.name);
-        appCard.style.animationDelay = `${index * 0.1}s`;
-        appCard.classList.add('animate-fadeInUp');
+        const appIcon = document.createElement('div');
+        appIcon.className = 'app-icon flex flex-col items-center justify-center animate-fadeIn';
+        appIcon.style.animationDelay = `${index * 0.05}s`;
+        appIcon.onclick = () => openApp(app.id, app.name);
         
-        appCard.innerHTML = `
-          <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300 filter drop-shadow-sm">${app.icon}</div>
-          <div class="text-2xl font-semibold text-gray-800 mb-3 group-hover:text-gray-900 transition-colors duration-300">${app.name}</div>
-          <div class="text-sm text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">${app.description}</div>
+        // Android-style app icon
+        appIcon.innerHTML = `
+          <div class="w-16 h-16 mb-2 flex items-center justify-center bg-white rounded-2xl shadow-md">
+            <div class="text-3xl">${app.icon}</div>
+          </div>
+          <div class="text-xs font-medium text-gray-700 text-center max-w-[70px] truncate">${app.name}</div>
         `;
         
-        appGrid.appendChild(appCard);
+        appGrid.appendChild(appIcon);
       });
     }
 
@@ -116,23 +131,17 @@
       type: 'REQUEST_APPS'
     }, '*');
 
-    // Add fadeInUp animation styles
+    // Add animation styles
     const style = document.createElement('style');
     style.textContent = `
-      .animate-fadeInUp {
-        opacity: 0;
-        animation: fadeInUp 0.6s ease-out forwards;
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       
-      @keyframes fadeInUp {
-        0% {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out forwards;
+        opacity: 0;
       }
     `;
     document.head.appendChild(style);

@@ -1,6 +1,6 @@
 # Mini Toolbox
 
-A browser-based productivity suite with tabs, featuring drawing, notes, and todo apps. Everything saves locally - no server required.
+A browser-based collection of mini tools — including free drawing, to-do list, notepad, hex editor, and more. Completely offline. No servers, no sign-up, no installation. Everything is saved locally in your browser. Just open index.html and you're good to go.
 
 ## Why?
 
@@ -41,7 +41,3 @@ To add a new app:
 ## License
 
 MIT License - feel free to use, modify, and distribute this project.
-
----
-
-Made with ❤️ for productivity enthusiasts
